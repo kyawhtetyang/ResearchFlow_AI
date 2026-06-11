@@ -1,0 +1,54 @@
+v0/
+├─ backend/
+│   ├─ alembic/
+│   │   ├─ versions/
+│   │   ├─ env.py
+│   │   └─ script.py.mako
+│   ├─ app/
+│   │   ├─ agents/
+│   │   │   ├─ __init__.py
+│   │   │   ├─ orchestrator.py
+│   │   │   ├─ planner.py
+│   │   │   ├─ report_agent.py
+│   │   │   ├─ retrieval_agent.py
+│   │   │   ├─ search_agent.py
+│   │   │   └─ summarizer_agent.py
+│   │   ├─ api/
+│   │   │   ├─ eval.py
+│   │   │   ├─ jobs.py
+│   │   │   ├─ reports.py
+│   │   │   └─ research.py
+│   │   ├─ models/
+│   │   │   ├─ __init__.py
+│   │   │   ├─ report.py
+│   │   │   ├─ research_job.py
+│   │   │   ├─ research_step.py
+│   │   │   └─ source.py
+│   │   ├─ services/
+│   │   │   ├─ __init__.py
+│   │   │   ├─ citations.py
+│   │   │   ├─ memory.py
+│   │   │   ├─ reports.py
+│   │   │   ├─ vector_search.py
+│   │   │   └─ web_search.py
+│   │   ├─ config.py
+│   │   ├─ db.py
+│   │   ├─ main.py
+│   │   ├─ schemas.py
+│   │   └─ worker.py
+│   ├─ frontend/
+│   ├─ scripts/
+│   │   └─ first_boot_verify.py
+│   ├─ tests/
+│   │   └─ test_agents.py
+│   ├─ alembic.ini
+│   ├─ Dockerfile
+│   └─ requirements.txt
+├─ docs/
+├─ frontend/
+│   ├─ app.js
+│   ├─ index.html
+│   └─ styles.css
+├─ .env.example
+├─ docker-compose.yml
+└─ README.md

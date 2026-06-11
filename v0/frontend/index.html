@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ResearchFlow AI</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="toolbar">
+        <div>
+          <h1>ResearchFlow AI</h1>
+          <p class="subtitle">Standalone AI research workflow for planning, evidence collection, source quality review, and cited reports.</p>
+        </div>
+        <nav>
+          <a href="/docs">API Docs</a>
+          <button id="run-eval" type="button">Run Eval</button>
+        </nav>
+      </section>
+
+      <section class="composer">
+        <div>
+          <h2>Research Brief</h2>
+          <textarea id="query" rows="4">What AI Engineer project should I build after a production RAG assistant?</textarea>
+        </div>
+        <button id="run" type="button">Run Research</button>
+      </section>
+
+      <section class="metrics">
+        <div><strong id="job-status">Ready</strong><span>Status</span></div>
+        <div><strong id="step-count">0</strong><span>Steps</span></div>
+        <div><strong id="source-count">0</strong><span>Sources</span></div>
+        <div><strong id="readiness">0.00</strong><span>Readiness</span></div>
+      </section>
+
+      <section class="eval-panel" id="eval-panel" hidden>
+        <h2>Evaluation</h2>
+        <pre id="eval-output"></pre>
+      </section>
+
+      <section class="grid">
+        <article>
+          <h2>Workflow Steps</h2>
+          <ol id="steps"></ol>
+        </article>
+        <article>
+          <h2>Sources</h2>
+          <ul id="sources"></ul>
+        </article>
+      </section>
+
+      <section class="report">
+        <div class="report-header">
+          <h2>Report</h2>
+          <button id="copy-report" type="button">Copy</button>
+        </div>
+        <div id="report" class="report-body">Run a research job to generate a cited report.</div>
+      </section>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

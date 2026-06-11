@@ -1,0 +1,19 @@
+{
+  "schema_version": 2,
+  "generated_at": "2026-06-11T15:03:54.574077+00:00",
+  "project_name": "07_ResearchFlow_AI",
+  "active_version": "v0",
+  "snapshot_label": "v1",
+  "history_id": null,
+  "snapshot_store": "version",
+  "pcloud_synced": true,
+  "snapshot_file": "all_back.txt",
+  "refill_source": "/Users/kyawhtet/pCloud Drive/(4) Database/02_Execution/07_ResearchFlow_AI/v1",
+  "refill_paths": [],
+  "refill_files": [],
+  "excluded_path_patterns": [
+    "backend/data",
+    "backend_fastapi/data",
+    "data"
+  ]
+}
