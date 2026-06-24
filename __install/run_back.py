@@ -80,7 +80,7 @@ EXTERNALIZE_EXTENSIONS = {
     ".zip",
 }
 
-INVISIBLE_FILE_WHITELIST = {".env", ".gitignore"}
+INVISIBLE_FILE_WHITELIST = {".gitignore"}
 SNAPSHOT_DIR_NAME = "__snapshot"
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -192,6 +192,8 @@ def should_ignore_hidden(name: str) -> bool:
 
 
 def should_ignore_file(name: str) -> bool:
+    if name == ".env":
+        return True
     if name in BLACKLIST_FILES:
         return True
     if should_ignore_hidden(name) and not INCLUDE_INVISIBLE_FILES:
