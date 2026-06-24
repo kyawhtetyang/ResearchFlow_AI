@@ -1,46 +1,37 @@
 from __future__ import annotations
 
+import json
 
-def generate_report(query: str, plan: list[str], findings: list[str], sources: list[dict]) -> str:
-    lines = [
-        f"# Research Report: {query}",
-        "",
-        "## Executive Summary",
-        "ResearchFlow AI is a standalone agentic research workflow platform. It extends the prior RAG project by adding planning, evidence collection, analysis, reporting, and stored workflow traces.",
-        "",
-        "## Research Plan",
-    ]
+from app.services.llm import generate_markdown
 
-    for idx, item in enumerate(plan, start=1):
-        lines.append(f"{idx}. {item}")
 
-    lines.extend(["", "## Key Findings"])
-    for item in findings:
-        lines.append(f"- {item}")
-
-    lines.extend(["", "## Recommended Build Direction"])
-    lines.extend(
-        [
-            "- Build v1 with a custom orchestrator before adopting a framework.",
-            "- Use FastAPI, PostgreSQL, Docker, SQLAlchemy, and Alembic as the production foundation.",
-            "- Store jobs, steps, sources, and reports so the workflow is auditable.",
-            "- Add framework upgrades later: OpenAI Agents SDK, LangGraph, LangChain, and LlamaIndex.",
-            "- Connect AI/ML Portfolio Ask only after the standalone ResearchFlow API is stable.",
-        ]
-    )
-
-    lines.extend(["", "## Recruiter-Facing Proof"])
-    lines.extend(
-        [
-            "- Backend system design: job lifecycle, source storage, report storage, and API contracts.",
-            "- AI workflow design: visible planner, search, analysis, and report steps.",
-            "- Reliability mindset: deterministic fallback mode, source quality scores, and first-boot verification.",
-            "- Upgrade path: OpenAI Agents SDK, LangGraph, LangChain, LlamaIndex, and portfolio integration.",
-        ]
-    )
-
-    lines.extend(["", "## Sources"])
+def _sources_markdown(sources: list[dict]) -> str:
+    lines = ["## Sources"]
     for idx, source in enumerate(sources, start=1):
-        lines.append(f"{idx}. [{source['title']}]({source['url']}) - quality {source.get('quality_score', source.get('score', 0)):.2f}")
-
+        quality = float(source.get("quality_score", source.get("score", 0)) or 0)
+        lines.append(
+            f"{idx}. [{source['title']}]({source['url']}) - quality {quality:.2f}"
+        )
     return "\n".join(lines)
+
+
+def generate_report(query: str, plan: list[str], findings: list[dict], sources: list[dict]) -> str:
+    prompt = (
+        f"Research question:\n{query}\n\n"
+        f"Plan:\n{json.dumps(plan, ensure_ascii=True, indent=2)}\n\n"
+        f"Findings:\n{json.dumps(findings, ensure_ascii=True, indent=2)}\n\n"
+        "Write a clear markdown report with these sections exactly:\n"
+        "# Research Report: <query>\n"
+        "## Executive Summary\n"
+        "## Research Plan\n"
+        "## Findings\n"
+        "## Recommendations\n\n"
+        "Use only the supplied findings and keep claims grounded in the cited sources. "
+        "For every finding or recommendation, include inline citations like [Sources: 1, 3]. "
+        "Do not add a Sources section because it will be appended separately."
+    )
+    markdown = generate_markdown(
+        system_prompt="You are a precise research report writer who produces concise, evidence-based markdown.",
+        user_prompt=prompt,
+    ).strip()
+    return f"{markdown}\n\n{_sources_markdown(sources)}"

@@ -10,6 +10,11 @@ from app.models.source import Source
 
 router = APIRouter()
 
+
+@router.get("/", response_model=list[ResearchJobResponse])
+def list_research_jobs(db: Session = Depends(get_db)):
+    return db.query(ResearchJob).order_by(ResearchJob.created_at.desc()).limit(25).all()
+
 @router.post("/", response_model=ResearchJobResponse)
 def create_research_job(job_in: ResearchJobCreate, db: Session = Depends(get_db)):
     job = ResearchJob(query=job_in.query, status="pending")
@@ -65,3 +70,5 @@ def get_research_summary(job_id: int, db: Session = Depends(get_db)):
         has_report=report is not None,
         readiness_score=round(readiness, 3),
     )
+
+### backend/app/evals

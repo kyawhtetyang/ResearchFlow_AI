@@ -7,16 +7,52 @@ const jobStatusEl = document.querySelector("#job-status");
 const stepCountEl = document.querySelector("#step-count");
 const sourceCountEl = document.querySelector("#source-count");
 const readinessEl = document.querySelector("#readiness");
-const evalPanelEl = document.querySelector("#eval-panel");
-const evalOutputEl = document.querySelector("#eval-output");
-const evalEl = document.querySelector("#run-eval");
+const jobHistoryEl = document.querySelector("#job-history");
 const copyReportEl = document.querySelector("#copy-report");
+const themeToggleEl = document.querySelector("#theme-toggle");
+const reloadPageEl = document.querySelector("#reload-page");
 let latestReport = "";
+
+const getStoredTheme = () => {
+  try {
+    const storedTheme = window.localStorage.getItem("theme");
+    return storedTheme === "light" || storedTheme === "dark" ? storedTheme : "dark";
+  } catch {
+    return "dark";
+  }
+};
+
+let currentTheme = getStoredTheme();
+
+const applyTheme = (theme) => {
+  const root = document.documentElement;
+  root.classList.toggle("dark", theme === "dark");
+  if (themeToggleEl) {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    themeToggleEl.setAttribute("aria-label", `Switch to ${nextTheme} mode`);
+    themeToggleEl.setAttribute("title", `Switch to ${nextTheme} mode`);
+  }
+  try {
+    window.localStorage.setItem("theme", theme);
+  } catch {
+    // Ignore storage errors.
+  }
+};
+
+applyTheme(currentTheme);
 
 const setLoading = (isLoading) => {
   runEl.disabled = isLoading;
   runEl.textContent = isLoading ? "Researching..." : "Run Research";
 };
+
+const escapeHtml = (value) =>
+  String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 
 const renderMarkdown = (markdown) => {
   latestReport = markdown || "";
@@ -34,6 +70,59 @@ const renderMarkdown = (markdown) => {
   reportEl.innerHTML = html || "No report generated.";
 };
 
+const loadJob = async (jobId) => {
+  const [detail, summary] = await Promise.all([
+    fetch(`/api/research/${jobId}`).then((res) => res.json()),
+    fetch(`/api/research/${jobId}/summary`).then((res) => res.json()),
+  ]);
+  renderJob(detail, summary);
+};
+
+const renderJobHistory = (jobs) => {
+  if (!jobHistoryEl) return;
+  jobHistoryEl.innerHTML = "";
+
+  if (!jobs.length) {
+    const li = document.createElement("li");
+    li.innerHTML = "<span>No previous jobs yet.</span>";
+    jobHistoryEl.appendChild(li);
+    return;
+  }
+
+  for (const job of jobs) {
+    const li = document.createElement("li");
+    li.className = "history-item";
+    const status = escapeHtml(job.status);
+    const query = escapeHtml(job.query);
+    li.innerHTML = `
+      <button type="button" class="history-button" data-job-id="${job.id}">
+        <strong>#${job.id} - ${query}</strong>
+        <span>Status: ${status}</span>
+      </button>
+    `;
+    jobHistoryEl.appendChild(li);
+  }
+};
+
+const refreshJobHistory = async () => {
+  try {
+    const jobs = await fetch("/api/research/").then((res) => res.json());
+    renderJobHistory(Array.isArray(jobs) ? jobs : []);
+  } catch (error) {
+    if (!jobHistoryEl) return;
+    jobHistoryEl.innerHTML = `<li><span>Could not load job history: ${escapeHtml(error)}</span></li>`;
+  }
+};
+
+themeToggleEl?.addEventListener("click", () => {
+  currentTheme = currentTheme === "dark" ? "light" : "dark";
+  applyTheme(currentTheme);
+});
+
+reloadPageEl?.addEventListener("click", () => {
+  window.location.reload();
+});
+
 const renderJob = (data, summary) => {
   stepsEl.innerHTML = "";
   sourcesEl.innerHTML = "";
@@ -44,17 +133,18 @@ const renderJob = (data, summary) => {
 
   for (const step of data.steps) {
     const li = document.createElement("li");
-    li.innerHTML = `<strong>${step.step_order}. ${step.agent_name.replace("_", " ")}</strong><span>${step.output}</span>`;
+    li.innerHTML = `<strong>${step.step_order}. ${escapeHtml(step.agent_name.replaceAll("_", " "))}</strong><span>${escapeHtml(step.output)}</span>`;
     stepsEl.appendChild(li);
   }
 
   for (const source of data.sources) {
     const li = document.createElement("li");
-    li.innerHTML = `<strong>${source.title}</strong><span>${source.snippet}</span><small>${source.url} · quality ${Number(source.quality_score ?? 0).toFixed(2)}</small>`;
+    li.innerHTML = `<strong>${escapeHtml(source.title)}</strong><span>${escapeHtml(source.snippet ?? "")}</span><small>${escapeHtml(source.url)} · quality ${Number(source.quality_score ?? 0).toFixed(2)}</small>`;
     sourcesEl.appendChild(li);
   }
 
-  renderMarkdown(data.report?.markdown ?? "No report generated.");
+  const errorText = data.job?.error ? `Research job failed: ${data.job.error}` : "No report generated.";
+  renderMarkdown(data.report?.markdown ?? errorText);
 };
 
 runEl.addEventListener("click", async () => {
@@ -76,6 +166,7 @@ runEl.addEventListener("click", async () => {
       fetch(`/api/research/${created.id}/summary`).then((res) => res.json()),
     ]);
     renderJob(detail, summary);
+    await refreshJobHistory();
   } catch (error) {
     reportEl.textContent = `Research failed: ${error}`;
   } finally {
@@ -83,17 +174,16 @@ runEl.addEventListener("click", async () => {
   }
 });
 
-evalEl.addEventListener("click", async () => {
-  evalEl.disabled = true;
-  evalPanelEl.hidden = false;
-  evalOutputEl.textContent = "Running evaluation...";
+jobHistoryEl?.addEventListener("click", async (event) => {
+  const button = event.target.closest(".history-button");
+  if (!button) return;
+  const jobId = button.getAttribute("data-job-id");
+  if (!jobId) return;
+
   try {
-    const result = await fetch("/api/eval/run", { method: "POST" }).then((res) => res.json());
-    evalOutputEl.textContent = JSON.stringify(result, null, 2);
+    await loadJob(jobId);
   } catch (error) {
-    evalOutputEl.textContent = `Evaluation failed: ${error}`;
-  } finally {
-    evalEl.disabled = false;
+    reportEl.textContent = `Could not load saved job: ${error}`;
   }
 });
 
@@ -105,3 +195,5 @@ copyReportEl.addEventListener("click", async () => {
     copyReportEl.textContent = "Copy";
   }, 1200);
 });
+
+refreshJobHistory();

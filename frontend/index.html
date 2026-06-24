@@ -7,57 +7,142 @@
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body>
-    <main class="shell">
-      <section class="toolbar">
-        <div>
-          <h1>ResearchFlow AI</h1>
-          <p class="subtitle">Standalone AI research workflow for planning, evidence collection, source quality review, and cited reports.</p>
+    <div class="app-frame">
+      <aside class="shell-sidebar glass">
+        <div class="shell-brand">
+          <button
+            type="button"
+            id="reload-page"
+            class="shell-brand-button"
+            aria-label="Reload page"
+            title="Kyaw Htet"
+          >
+            <span class="shell-brand-badge">KH</span>
+            <span class="shell-brand-name">Kyaw Htet</span>
+          </button>
         </div>
-        <nav>
-          <a href="/docs">API Docs</a>
-          <button id="run-eval" type="button">Run Eval</button>
+
+        <nav class="shell-nav">
+          <div class="shell-nav-group">
+            <h2 class="shell-nav-label">Work</h2>
+            <button
+              type="button"
+              aria-label="ResearchFlow AI"
+              title="ResearchFlow AI"
+              class="shell-nav-item shell-nav-item-active"
+            >
+              <span class="shell-nav-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M4 12h16M4 19h16" />
+                </svg>
+              </span>
+              <span class="shell-nav-text">ResearchFlow AI</span>
+            </button>
+          </div>
         </nav>
-      </section>
+      </aside>
 
-      <section class="composer">
-        <div>
-          <h2>Research Brief</h2>
-          <textarea id="query" rows="4">What AI Engineer project should I build after a production RAG assistant?</textarea>
+      <main class="shell-main">
+        <header class="shell-topbar">
+          <h1 class="shell-topbar-title">ResearchFlow AI</h1>
+          <div class="shell-topbar-actions">
+            <button
+              type="button"
+              id="theme-toggle"
+              class="shell-icon-button"
+              aria-label="Switch to light mode"
+              title="Switch to light mode"
+            >
+              <span class="theme-icon theme-icon-sun" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3m14.95-6.95-1.41 1.41M7.46 16.54l-1.41 1.41m0-11.31 1.41 1.41m10.08 10.08 1.41 1.41M12 7a5 5 0 100 10 5 5 0 000-10z" />
+                </svg>
+              </span>
+              <span class="theme-icon theme-icon-moon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />
+                </svg>
+              </span>
+            </button>
+          </div>
+        </header>
+
+        <div class="workspace">
+          <section class="workspace-main">
+            <div class="workspace-card">
+              <div class="workspace-kicker">Research workspace</div>
+              <div class="composer-panel">
+                <div class="composer-copy">
+                  <h2>Research Brief</h2>
+                  <p class="composer-note">Frame the question, run the workflow, and review the cited output in one focused workspace.</p>
+                </div>
+                <label class="sr-only" for="query">Research brief</label>
+                <textarea id="query" rows="4">What AI Engineer project should I build after a production RAG assistant?</textarea>
+                <div class="composer-actions">
+                  <button id="run" type="button" class="run-button">Run Research</button>
+                </div>
+              </div>
+
+              <div class="report-panel">
+                <div class="report-header">
+                  <div>
+                    <h2>Report</h2>
+                    <p class="report-note">The generated report remains the primary output surface.</p>
+                  </div>
+                  <button id="copy-report" type="button" class="copy-button">Copy</button>
+                </div>
+                <div id="report" class="report-body">Run a research job to generate a cited report.</div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="workspace-rail">
+            <section class="rail-card">
+              <h2>Run Metrics</h2>
+              <div class="metrics-grid">
+                <div class="metric-card"><strong id="job-status">Ready</strong><span>Status</span></div>
+                <div class="metric-card"><strong id="step-count">0</strong><span>Steps</span></div>
+                <div class="metric-card"><strong id="source-count">0</strong><span>Sources</span></div>
+                <div class="metric-card"><strong id="readiness">0.00</strong><span>Readiness</span></div>
+              </div>
+            </section>
+
+            <section class="rail-card">
+              <h2>Workflow Steps</h2>
+              <ol id="steps" class="stack-list"></ol>
+            </section>
+
+            <section class="rail-card">
+              <h2>Sources</h2>
+              <ul id="sources" class="stack-list"></ul>
+            </section>
+
+            <section class="rail-card">
+              <h2>Recent Jobs</h2>
+              <ul id="job-history" class="stack-list"></ul>
+            </section>
+          </aside>
         </div>
-        <button id="run" type="button">Run Research</button>
-      </section>
+      </main>
 
-      <section class="metrics">
-        <div><strong id="job-status">Ready</strong><span>Status</span></div>
-        <div><strong id="step-count">0</strong><span>Steps</span></div>
-        <div><strong id="source-count">0</strong><span>Sources</span></div>
-        <div><strong id="readiness">0.00</strong><span>Readiness</span></div>
-      </section>
-
-      <section class="eval-panel" id="eval-panel" hidden>
-        <h2>Evaluation</h2>
-        <pre id="eval-output"></pre>
-      </section>
-
-      <section class="grid">
-        <article>
-          <h2>Workflow Steps</h2>
-          <ol id="steps"></ol>
-        </article>
-        <article>
-          <h2>Sources</h2>
-          <ul id="sources"></ul>
-        </article>
-      </section>
-
-      <section class="report">
-        <div class="report-header">
-          <h2>Report</h2>
-          <button id="copy-report" type="button">Copy</button>
+      <nav class="shell-mobile-nav">
+        <div class="shell-mobile-nav-grid">
+          <button
+            type="button"
+            aria-label="ResearchFlow AI"
+            title="ResearchFlow AI"
+            class="shell-mobile-nav-item shell-mobile-nav-item-active"
+          >
+            <span class="shell-mobile-nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M4 12h16M4 19h16" />
+              </svg>
+            </span>
+            <span class="shell-mobile-nav-text">ResearchFlow AI</span>
+          </button>
         </div>
-        <div id="report" class="report-body">Run a research job to generate a cited report.</div>
-      </section>
-    </main>
+      </nav>
+    </div>
     <script src="/static/app.js"></script>
   </body>
 </html>

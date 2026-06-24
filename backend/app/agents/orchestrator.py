@@ -13,6 +13,7 @@ from app.models.research_job import ResearchJob
 from app.models.research_step import ResearchStep
 from app.models.source import Source
 from app.services.citations import score_source_quality
+from app.services.errors import ResearchFlowError
 
 
 def _add_step(db: Session, job_id: int, order: int, agent_name: str, input_text: str, output_text: str) -> None:
@@ -26,6 +27,16 @@ def _add_step(db: Session, job_id: int, order: int, agent_name: str, input_text:
             output=output_text,
         )
     )
+
+
+def _format_findings(findings: list[dict]) -> str:
+    lines = []
+    for idx, finding in enumerate(findings, start=1):
+        citations = ", ".join(str(number) for number in finding.get("citation_numbers", []))
+        lines.append(f"{idx}. {finding['claim']} [Sources: {citations}]")
+        if finding.get("evidence"):
+            lines.append(f"Evidence: {finding['evidence']}")
+    return "\n".join(lines)
 
 
 def run_research_job(db: Session, job: ResearchJob) -> ResearchJob:
@@ -57,7 +68,7 @@ def run_research_job(db: Session, job: ResearchJob) -> ResearchJob:
         _add_step(db, job.id, 2, "search_agent", job.query, "\n".join(f"- {s['title']} ({s['url']})" for s in sources))
 
         findings = summarize_findings(job.query, sources)
-        _add_step(db, job.id, 3, "analysis_agent", "\n".join(s["content"] for s in sources), "\n".join(findings))
+        _add_step(db, job.id, 3, "analysis_agent", "\n".join(s["content"] for s in sources), _format_findings(findings))
 
         markdown = generate_report(job.query, plan, findings, sources)
         report = Report(job_id=job.id, markdown=markdown)
@@ -69,10 +80,19 @@ def run_research_job(db: Session, job: ResearchJob) -> ResearchJob:
         db.commit()
         db.refresh(job)
         return job
-    except Exception as exc:
+    except ResearchFlowError as exc:
         job.status = "failed"
-        job.error = str(exc)
+        job.error = exc.user_message
         job.completed_at = datetime.utcnow()
         db.commit()
         db.refresh(job)
-        raise
+        return job
+    except Exception:
+        job.status = "failed"
+        job.error = "Unexpected research workflow failure."
+        job.completed_at = datetime.utcnow()
+        db.commit()
+        db.refresh(job)
+        return job
+
+###### planner.py

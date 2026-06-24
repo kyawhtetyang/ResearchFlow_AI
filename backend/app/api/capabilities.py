@@ -11,12 +11,12 @@ router = APIRouter()
 @router.get("/")
 def capabilities() -> dict[str, object]:
     return {
-        "version": "2.0.0",
-        "release": "full_ai_research_platform",
+        "version": "3.0.0",
+        "release": "v1_research_completion",
         "core": {
             "backend": ["FastAPI", "PostgreSQL", "pgvector", "Docker", "SQLAlchemy", "Alembic"],
-            "workflow": ["custom planner", "custom orchestrator", "worker", "reports", "citations"],
-            "frontend": ["standalone ResearchFlow UI", "AI/ML Portfolio Ask integration"],
+            "workflow": ["LLM planner", "Tavily web search", "LLM summarizer", "LLM report generation", "citations"],
+            "frontend": ["standalone ResearchFlow UI", "stored job history", "AI/ML Portfolio Ask integration"],
         },
         "agents": {
             "native": "Plan -> Search -> Analyze -> Report -> Evaluate",
@@ -35,3 +35,5 @@ def capabilities() -> dict[str, object]:
             "observability": tracing_capability(),
         },
     }
+
+###### eval.py
