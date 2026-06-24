@@ -11,8 +11,10 @@ router = APIRouter()
 @router.get("/")
 def capabilities() -> dict[str, object]:
     return {
-        "version": "3.0.0",
-        "release": "v1_research_completion",
+        "version": "1.0.0",
+        "release": "1.0.0",
+        "status": "complete",
+        "snapshot_line": "v3",
         "core": {
             "backend": ["FastAPI", "PostgreSQL", "pgvector", "Docker", "SQLAlchemy", "Alembic"],
             "workflow": ["LLM planner", "Tavily web search", "LLM summarizer", "LLM report generation", "citations"],

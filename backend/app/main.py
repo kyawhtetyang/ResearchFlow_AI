@@ -11,7 +11,7 @@ from app.api.research import router as research_router
 from app.db import Base, engine
 from app import models  # noqa: F401
 
-app = FastAPI(title="ResearchFlow AI API", version="3.0.0")
+app = FastAPI(title="ResearchFlow AI API", version="1.0.0")
 
 _resolved_main = Path(__file__).resolve()
 _frontend_candidates = [_resolved_main.parents[1] / "frontend"]
@@ -40,7 +40,7 @@ if FRONTEND_DIR.exists():
 
 @app.get("/health")
 def healthcheck():
-    return {"status": "ok", "app": "ResearchFlow AI", "version": "3.0.0"}
+    return {"status": "ok", "app": "ResearchFlow AI", "version": "1.0.0"}
 
 @app.get("/", response_class=FileResponse)
 def frontend():

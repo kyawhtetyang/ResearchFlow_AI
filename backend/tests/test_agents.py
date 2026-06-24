@@ -83,11 +83,13 @@ def test_research_agents_generate_a_source_backed_report(monkeypatch):
     assert "## Sources" in report
 
 
-def test_v3_capabilities_expose_real_v1_research_flow():
+def test_capabilities_expose_release_1_0_0():
     payload = capabilities()
 
-    assert payload["version"] == "3.0.0"
-    assert payload["release"] == "v1_research_completion"
+    assert payload["version"] == "1.0.0"
+    assert payload["release"] == "1.0.0"
+    assert payload["status"] == "complete"
+    assert payload["snapshot_line"] == "v3"
     assert "Tavily web search" in payload["core"]["workflow"]
     assert "stored job history" in payload["core"]["frontend"]
     assert payload["agents"]["openai_agents_sdk"]["framework"] == "OpenAI Agents SDK"
